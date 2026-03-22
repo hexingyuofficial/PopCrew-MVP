@@ -28,7 +28,7 @@ def is_proposal_placeholder(p: str) -> bool:
     return bool(t.startswith("【") and "正在与您沟通" in t and "项目企划书将在此处" in t)
 
 # 2. API Key：优先环境变量与 secrets，硬编码仅作本地演示兜底（勿提交真实 Key 到公开仓库）
-API_KEY_HARDCODED = "sk-901fae88f8a04c1dbdbe4dea98a0c95a"
+API_KEY_HARDCODED = ""
 
 
 def _resolve_api_key() -> str:
@@ -932,7 +932,7 @@ def render_budget_donut(bud: dict, spend_ratio: float) -> None:
         sizes = [1, 0, 0]
         colors = ["#bdc3c7", "#ecf0f1", "#ecf0f1"]
 
-    fig, ax = plt.subplots(figsize=(3.4, 3.4), dpi=120)
+    fig, ax = plt.subplots(figsize=(2.65, 2.65), dpi=110)
     try:
         plt.rcParams["font.sans-serif"] = [
             "PingFang SC",
@@ -1076,19 +1076,19 @@ def build_timeline_axis_html(ratios: list[float]) -> str:
     inner = "".join(items)
     return f"""<div class="tl-axis-wrap"><div class="tl-axis">{inner}</div></div>
 <style>
-.tl-axis-wrap {{ width:100%; overflow-x:auto; padding:4px 0 10px; box-sizing:border-box; }}
-.tl-axis {{ display:flex; align-items:flex-start; justify-content:space-between; min-width:min(100%, 820px); }}
-.tl-item {{ flex:1; min-width:52px; text-align:center; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-size:11px; color:#31333F; }}
-.tl-row {{ display:flex; align-items:center; height:16px; margin-bottom:4px; }}
-.tl-bar {{ flex:1; height:3px; background:#dee2e6; min-width:2px; }}
-.tl-dot {{ width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid #b8bcc4; background:#eceff3; }}
+.tl-axis-wrap {{ width:100%; overflow-x:auto; padding:2px 0 6px; box-sizing:border-box; }}
+.tl-axis {{ display:flex; align-items:flex-start; justify-content:space-between; min-width:min(100%, 640px); }}
+.tl-item {{ flex:1; min-width:44px; text-align:center; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-size:10px; color:#31333F; }}
+.tl-row {{ display:flex; align-items:center; height:14px; margin-bottom:2px; }}
+.tl-bar {{ flex:1; height:2px; background:#dee2e6; min-width:2px; }}
+.tl-dot {{ width:10px; height:10px; border-radius:50%; flex-shrink:0; border:2px solid #b8bcc4; background:#eceff3; }}
 .tl-item.tl-done .tl-dot {{ background:#21a36f; border-color:#188a5e; }}
 .tl-item.tl-on .tl-dot {{ background:#ffbd45; border-color:#d4941c; box-shadow:0 0 0 3px rgba(255,189,69,0.3); }}
 .tl-item.tl-done .tl-bar {{ background:#a8e6cf; }}
 .tl-item.tl-on .tl-bar-l {{ background:linear-gradient(90deg,#a8e6cf,#ffe08a); }}
 .tl-item.tl-on .tl-bar-r {{ background:linear-gradient(90deg,#ffe08a,#dee2e6); }}
 .tl-lbl {{ font-weight:600; line-height:1.2; margin-bottom:2px; }}
-.tl-pct {{ opacity:0.78; font-size:10px; }}
+.tl-pct {{ opacity:0.78; font-size:9px; }}
 </style>"""
 
 
@@ -1124,28 +1124,64 @@ def render_mv_timeline_panel(proj: dict) -> None:
 
 
 # 「项目治理」标签页专用样式（挂 st.tabs key=workspace_tabs）
+# 整体 zoom + 视口高度：面向 13" Mac 一屏可读（与「立项」中栏同为缩放思路）
 PM_GOVERNANCE_TAB_CSS = """
 <style>
-div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stVerticalBlock"] > [data-testid="element-container"] {
-    margin-bottom: 0.2rem !important;
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) {
+    zoom: 0.74;
+    max-height: calc(100vh - 4.25rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.35rem;
+    box-sizing: border-box;
 }
-div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) h3 {
-    font-size: 1.05rem !important;
-    margin-top: 0.1rem !important;
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2)::-webkit-scrollbar {
+    width: 8px;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2)::-webkit-scrollbar-thumb {
+    background: rgba(49, 51, 63, 0.28);
+    border-radius: 4px;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stVerticalBlock"] > [data-testid="element-container"] {
+    margin-bottom: 0.12rem !important;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) h3,
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) h5 {
+    font-size: 1rem !important;
+    margin-top: 0.05rem !important;
+    margin-bottom: 0.05rem !important;
+    line-height: 1.25 !important;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stCaption"] {
+    font-size: 0.78rem !important;
+    margin-top: 0 !important;
     margin-bottom: 0.1rem !important;
+    line-height: 1.3 !important;
 }
 div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stMetricValue"] {
-    font-size: 1.15rem !important;
+    font-size: 1.05rem !important;
 }
 div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stMetricLabel"] {
-    font-size: 0.72rem !important;
+    font-size: 0.68rem !important;
 }
 div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stProgress"] > div {
-    height: 5px !important;
+    height: 4px !important;
 }
 div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stExpander"] details {
-    padding-top: 0.25rem !important;
-    padding-bottom: 0.25rem !important;
+    padding-top: 0.18rem !important;
+    padding-bottom: 0.18rem !important;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stAlert"] {
+    padding: 0.35rem 0.55rem !important;
+    font-size: 0.82rem !important;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-baseweb="radio"] label {
+    font-size: 0.78rem !important;
+}
+div.st-key-workspace_tabs [role="tabpanel"]:nth-of-type(2) [data-testid="stMarkdownContainer"] p {
+    margin-bottom: 0.35rem !important;
+    font-size: 0.88rem !important;
+    line-height: 1.35 !important;
 }
 </style>
 """
@@ -1156,7 +1192,7 @@ def render_project_governance_tab():
     st.markdown(PM_GOVERNANCE_TAB_CSS, unsafe_allow_html=True)
 
     st.markdown("##### 项目治理仪表盘（演示）")
-    st.caption("PopCrew · 一屏总览：人 / 里程碑 / 资金 · 会议与群为占位链接")
+    st.caption("PopCrew · 13\" 级视口一屏总览（整页已缩放）；人 / 里程碑 / 资金 · 会议与群为占位链接")
 
     labels = [f"{p['title']} · {p['phase']}" for p in DEMO_ACTIVE_PROJECTS]
     ids = [p["id"] for p in DEMO_ACTIVE_PROJECTS]
@@ -1221,7 +1257,7 @@ def render_project_governance_tab():
             pd.DataFrame(mem_rows),
             hide_index=True,
             use_container_width=True,
-            height=min(120 + len(mem_rows) * 35, 260),
+            height=min(88 + len(mem_rows) * 28, 198),
         )
 
     st.caption("**项目资金池**")
@@ -1277,7 +1313,7 @@ def render_project_governance_tab():
                 pd.DataFrame(ledger),
                 hide_index=True,
                 use_container_width=True,
-                height=min(160 + len(ledger) * 32, 320),
+                height=min(112 + len(ledger) * 26, 252),
             )
         else:
             st.caption("（暂无演示行）")
