@@ -27,7 +27,8 @@ def is_proposal_placeholder(p: str) -> bool:
     t = (p or "").strip()
     return bool(t.startswith("【") and "正在与您沟通" in t and "项目企划书将在此处" in t)
 
-# 2. API Key：优先环境变量与 secrets，硬编码仅作本地演示兜底（勿提交真实 Key 到公开仓库）
+# 2. API Key：优先环境变量与 secrets；本地可把 Key 写在下方常量（勿提交公开仓库）
+API_KEY_HARDCODED = ""
 
 
 def _resolve_api_key() -> str:
