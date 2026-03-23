@@ -1,43 +1,299 @@
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>制片人控制台 · PopCrew</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: [
-                "-apple-system",
-                "BlinkMacSystemFont",
-                '"SF Pro Text"',
-                '"Segoe UI"',
-                "Roboto",
-                "Helvetica",
-                "Arial",
-                "sans-serif",
-              ],
-            },
-          },
-        },
-      };
-    </script>
-    <style>
-      html,
-      body {
-        margin: 0;
+<div id="popcrew-pd-host" class="popcrew-pd-host">
+  <style>
+    .popcrew-pd-host {
+      box-sizing: border-box;
+      margin: 0;
+      min-height: 920px;
+      width: 100%;
+      isolation: isolate;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .popcrew-pd-host *,
+    .popcrew-pd-host *::before,
+    .popcrew-pd-host *::after {
+      box-sizing: border-box;
+    }
+    #popcrew-pd-root {
+      min-height: 400px;
+    }
+      .pd-page {
         min-height: 100%;
-        background: #f5f5f7;
-        color: #1d1d1f;
-        -webkit-font-smoothing: antialiased;
+        padding: 1.5rem 1.25rem 2.5rem;
+      }
+      .pd-container {
+        max-width: 56rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .pd-kicker {
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #a1a1aa;
+        margin: 0;
+      }
+      .pd-title {
+        margin: 0.25rem 0 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #18181b;
+      }
+      .pd-sub {
+        margin: 0.25rem 0 0;
+        font-size: 0.875rem;
+        color: #71717a;
+        line-height: 1.45;
+      }
+      .pd-day-row {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .pd-day-label {
+        margin-right: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #a1a1aa;
+      }
+      .pd-day-btn {
+        border: none;
+        cursor: pointer;
+        border-radius: 9999px;
+        padding: 0.375rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+      }
+      .pd-day-btn--active {
+        background: #18181b;
+        color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+      .pd-day-btn--idle {
+        background: #fff;
+        color: #52525b;
+        box-shadow: 0 0 0 1px rgba(228, 228, 231, 0.9);
+      }
+      .pd-day-btn--idle:hover {
+        background: #fafafa;
+      }
+      .pd-main {
+        margin-top: 2rem;
+        max-width: 56rem;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .pd-section {
+        margin-bottom: 2rem;
+      }
+      .pd-section-head {
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+      .pd-h2 {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #27272a;
+      }
+      .pd-add-btn {
+        display: flex;
+        height: 2rem;
+        width: 2rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        border: none;
+        cursor: pointer;
+        background: #fff;
+        color: #52525b;
+        box-shadow: 0 0 0 1px #e4e4e7;
+        transition: background 0.15s, color 0.15s;
+      }
+      .pd-add-btn:hover {
+        background: #fafafa;
+        color: #18181b;
+      }
+      .pd-task-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .pd-task-list > li {
+        margin-bottom: 0.625rem;
+      }
+      .pd-card {
+        position: relative;
+        width: 100%;
+        cursor: pointer;
+        border-radius: 1rem;
+        padding: 0.875rem 1rem;
+        text-align: left;
+        transition: filter 0.15s, transform 0.1s;
+      }
+      .pd-card:hover {
+        filter: brightness(1.02);
+      }
+      .pd-card:active {
+        transform: scale(0.99);
+      }
+      .pd-card--todo {
+        border: 1px solid rgba(228, 228, 231, 0.95);
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+      .pd-card--ai {
+        border: 1px solid rgba(253, 230, 138, 0.85);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 251, 235, 0.98) 0%,
+          rgba(236, 253, 245, 0.65) 45%,
+          #fff 100%
+        );
+        box-shadow: 0 1px 3px rgba(217, 119, 6, 0.08);
+      }
+      .pd-card--done {
+        border: 1px solid rgba(6, 78, 59, 0.2);
+        background: #065f46;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(6, 78, 59, 0.35);
+      }
+      .pd-del-btn {
+        position: absolute;
+        right: 0.75rem;
+        top: 0.75rem;
+        z-index: 10;
+        display: flex;
+        height: 1.75rem;
+        width: 1.75rem;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 9999px;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.05);
+        color: #71717a;
+        opacity: 0.75;
+        transition: background 0.15s, opacity 0.15s;
+      }
+      .pd-del-btn:hover {
+        background: rgba(0, 0, 0, 0.1);
+        opacity: 1;
+      }
+      .pd-card--done .pd-del-btn {
+        background: rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .pd-card--done .pd-del-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+      .pd-card-row {
+        display: flex;
+        gap: 0.75rem;
+        padding-right: 2.25rem;
+      }
+      .pd-card-icon {
+        margin-top: 2px;
+        flex-shrink: 0;
+      }
+      .pd-card-body {
+        min-width: 0;
+        flex: 1;
+      }
+      .pd-card-title-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .pd-tag-carry {
+        border-radius: 0.375rem;
+        background: #ef4444;
+        padding: 0.125rem 0.375rem;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #fff;
+      }
+      .pd-task-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.35;
+        color: #18181b;
+      }
+      .pd-task-title--on-dark {
+        color: #fff;
+      }
+      .pd-ai-row {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+      }
+      .pd-ai-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.75);
+        padding: 0.125rem 0.5rem;
+        font-weight: 500;
+        color: #78350f;
+        box-shadow: 0 0 0 1px rgba(253, 230, 138, 0.65);
+      }
+      .pd-ai-meta {
+        color: rgba(146, 64, 14, 0.85);
+      }
+      .pd-ai-wait {
+        color: #71717a;
+      }
+      .pd-verified {
+        margin: 0.5rem 0 0;
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.96);
+      }
+      .pd-todo-hint {
+        margin: 0.375rem 0 0;
+        font-size: 0.75rem;
+        color: #a1a1aa;
+      }
+      .pd-svg-zinc {
+        color: #d4d4d8;
+      }
+      .pd-svg-amber {
+        color: #d97706;
+      }
+      .pd-check-wrap {
+        display: flex;
+        height: 1.25rem;
+        width: 1.25rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .pd-svg-white {
+        color: #fff;
       }
     </style>
-  </head>
-  <body>
-    <div id="root"></div>
+    <div id="popcrew-pd-root"></div>
     <script>
       (function () {
         var day = "today";
@@ -57,16 +313,12 @@
           {
             id: "g_soda",
             name: "导演-Soda",
-            tasks: [
-              { id: "t2", title: "提交分镜脚本 V2 版", status: 3 },
-            ],
+            tasks: [{ id: "t2", title: "提交分镜脚本 V2 版", status: 3 }],
           },
           {
             id: "g_aq",
             name: "灯光-阿强",
-            tasks: [
-              { id: "t3", title: "清点阿莱灯阵并装车", status: 1 },
-            ],
+            tasks: [{ id: "t3", title: "清点阿莱灯阵并装车", status: 1 }],
           },
         ];
 
@@ -80,78 +332,88 @@
         }
 
         function iconCircle() {
-          return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-zinc-300"><circle cx="12" cy="12" r="10"/></svg>';
+          return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="pd-svg-zinc"><circle cx="12" cy="12" r="10"/></svg>'
+          );
         }
         function iconCheckCircle2() {
-          return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-amber-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 12 2 2 4-4"/></svg>';
+          return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pd-svg-amber"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 12 2 2 4-4"/></svg>'
+          );
         }
         function iconCheck() {
-          return '<span class="flex h-5 w-5 items-center justify-center rounded-full bg-white/20"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-white"><path d="M20 6 9 17l-5-5"/></svg></span>';
+          return (
+            '<span class="pd-check-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="pd-svg-white"><path d="M20 6 9 17l-5-5"/></svg></span>'
+          );
         }
         function iconBot() {
-          return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>';
+          return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>'
+          );
         }
         function iconPlus() {
-          return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>';
+          return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>'
+          );
         }
         function iconX() {
-          return '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+          return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'
+          );
         }
 
         function shellClass(status) {
-          if (status === 1)
-            return "border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]";
-          if (status === 2)
-            return "border border-amber-200/80 bg-gradient-to-br from-amber-50/95 via-lime-50/60 to-white shadow-[0_1px_3px_rgba(217,119,6,0.08)]";
-          return "border border-emerald-900/20 bg-emerald-800 text-white shadow-[0_4px_20px_rgba(6,78,59,0.35)]";
+          if (status === 1) return "pd-card pd-card--todo";
+          if (status === 2) return "pd-card pd-card--ai";
+          return "pd-card pd-card--done";
         }
 
         function render() {
-          var root = document.getElementById("root");
+          var root = document.getElementById("popcrew-pd-root");
+          if (!root) return;
           var dayBtns = [
             { key: "yesterday", label: "昨日" },
             { key: "today", label: "今日" },
             { key: "tomorrow", label: "明日" },
           ];
           var h =
-            '<div class="min-h-full px-5 py-6 pb-10">' +
-            '<header class="mx-auto max-w-4xl">' +
-            '<p class="text-xs font-medium uppercase tracking-widest text-zinc-400">Producer Dashboard · Mock</p>' +
-            '<h1 class="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">《Soda_MV》成都外景组</h1>' +
-            '<p class="mt-1 text-sm text-zinc-500">按成员分组的当日任务 · 点击卡片循环：未完成 → AI 确认 → 人类已核实</p>' +
-            '<div class="mt-6 flex flex-wrap items-center gap-2">' +
-            '<span class="mr-2 text-xs font-medium text-zinc-400">时间</span>';
+            '<div class="pd-page">' +
+            '<header class="pd-container">' +
+            '<p class="pd-kicker">Producer Dashboard · Mock</p>' +
+            '<h1 class="pd-title">《Soda_MV》成都外景组</h1>' +
+            '<p class="pd-sub">按成员分组的当日任务 · 点击卡片循环：未完成 → AI 确认 → 人类已核实</p>' +
+            '<div class="pd-day-row">' +
+            '<span class="pd-day-label">时间</span>';
           dayBtns.forEach(function (b) {
             var active =
-              day === b.key
-                ? "bg-zinc-900 text-white shadow-sm"
-                : "bg-white text-zinc-600 ring-1 ring-zinc-200/80 hover:bg-zinc-50";
+              day === b.key ? "pd-day-btn pd-day-btn--active" : "pd-day-btn pd-day-btn--idle";
             h +=
               '<button type="button" data-day="' +
               b.key +
-              '" class="rounded-full px-4 py-1.5 text-sm font-medium transition-all ' +
+              '" class="' +
               active +
               '">' +
               b.label +
               "</button>";
           });
-          h += '</div></header><main class="mx-auto mt-8 max-w-4xl space-y-8">';
+          h += '</div></header><main class="pd-main">';
 
           groups.forEach(function (g) {
             h +=
-              '<section><div class="mb-3 flex items-center justify-between gap-3">' +
-              '<h2 class="text-sm font-semibold text-zinc-800">' +
+              '<section class="pd-section"><div class="pd-section-head">' +
+              '<h2 class="pd-h2">' +
               esc(g.name) +
               '</h2><button type="button" data-add="' +
               esc(g.id) +
-              '" class="flex h-8 w-8 items-center justify-center rounded-full bg-white text-zinc-600 ring-1 ring-zinc-200 transition hover:bg-zinc-50 hover:text-zinc-900" aria-label="添加任务">' +
+              '" class="pd-add-btn" aria-label="添加任务">' +
               iconPlus() +
-              "</button></div><ul class="space-y-2.5">";
+              "</button></div><ul class="pd-task-list">";
 
             g.tasks.forEach(function (task) {
               var showTag = day === "today" && task.carriedOver;
               var st = task.status;
-              var titleCls = st === 3 ? "text-white" : "text-zinc-900";
+              var titleCls =
+                st === 3 ? "pd-task-title pd-task-title--on-dark" : "pd-task-title";
               var icon =
                 st === 1
                   ? iconCircle()
@@ -163,42 +425,35 @@
                 esc(g.id) +
                 "|" +
                 esc(task.id) +
-                '" class="group relative w-full cursor-pointer rounded-2xl px-4 py-3.5 text-left transition hover:brightness-[1.02] active:scale-[0.99] ' +
+                '" class="' +
                 shellClass(st) +
                 '">' +
                 '<button type="button" data-del="' +
                 esc(g.id) +
                 "|" +
                 esc(task.id) +
-                '" class="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/5 text-zinc-500 opacity-70 transition hover:bg-black/10 hover:opacity-100">' +
+                '" class="pd-del-btn">' +
                 iconX() +
-                '</button><div class="flex gap-3 pr-9"><div class="mt-0.5 shrink-0">' +
+                '</button><div class="pd-card-row"><div class="pd-card-icon">' +
                 icon +
-                '</div><div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2">';
+                '</div><div class="pd-card-body"><div class="pd-card-title-row">';
               if (showTag) {
-                h +=
-                  '<span class="rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">昨日顺延</span>';
+                h += '<span class="pd-tag-carry">昨日顺延</span>';
               }
-              h +=
-                '<p class="text-[15px] font-medium leading-snug ' +
-                titleCls +
-                '">' +
-                esc(task.title) +
-                "</p></div>";
+              h += '<p class="' + titleCls + '">' + esc(task.title) + "</p></div>";
               if (st === 2) {
                 h +=
-                  '<div class="mt-2 flex flex-wrap items-center gap-2 text-xs">' +
-                  '<span class="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 font-medium text-amber-900 ring-1 ring-amber-200/60">' +
+                  '<div class="pd-ai-row">' +
+                  '<span class="pd-ai-pill">' +
                   iconBot() +
                   " AI 已确认</span>" +
-                  '<span class="text-amber-800/80">· 龙虾识别</span>' +
-                  '<span class="text-zinc-500">待老板终审</span></div>';
+                  '<span class="pd-ai-meta">· 龙虾识别</span>' +
+                  '<span class="pd-ai-wait">待老板终审</span></div>';
               } else if (st === 3) {
-                h +=
-                  '<p class="mt-2 text-sm font-bold tracking-wide text-white/95">✅ 已核实</p>';
+                h += '<p class="pd-verified">✅ 已核实</p>';
               } else {
                 h +=
-                  '<p class="mt-1.5 text-xs text-zinc-400">未完成 · 点击卡片推进状态</p>';
+                  '<p class="pd-todo-hint">未完成 · 点击卡片推进状态</p>';
               }
               h += "</div></div></div></li>";
             });
@@ -279,5 +534,4 @@
         render();
       })();
     </script>
-  </body>
-</html>
+</div>
