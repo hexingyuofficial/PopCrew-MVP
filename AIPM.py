@@ -31,7 +31,7 @@ def is_proposal_placeholder(p: str) -> bool:
     return bool(t.startswith("【") and "正在与您沟通" in t and "项目企划书将在此处" in t)
 
 # 2. API Key：优先环境变量与 secrets；本地可把 Key 写在下方常量（勿提交公开仓库）
-API_KEY_HARDCODED = "sk-901fae88f8a04c1dbdbe4dea98a0c95a"
+API_KEY_HARDCODED = ""
 
 
 def _resolve_api_key() -> str:
