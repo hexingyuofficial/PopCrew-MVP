@@ -2,6 +2,7 @@ import html as html_module
 import json
 import os
 import re
+from pathlib import Path
 import ssl
 import urllib.error
 import urllib.request
@@ -57,6 +58,22 @@ client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
 # 左侧对话 iframe 高度（内容在框内滚动）
 CHAT_IFRAME_HEIGHT = 280
+
+# PM · 制片人控制台（第三 Tab）嵌入单页 HTML
+_PRODUCER_DASHBOARD_PATH = (
+    Path(__file__).resolve().parent / "producer-dashboard" / "dist" / "producer-dashboard.embed.html"
+)
+
+
+def _load_producer_dashboard_html() -> str:
+    if not _PRODUCER_DASHBOARD_PATH.is_file():
+        return (
+            "<div style='padding:1.25rem;font-family:system-ui,sans-serif;font-size:14px;color:#555'>"
+            f"未找到 <code>producer-dashboard.embed.html</code>（路径：{_PRODUCER_DASHBOARD_PATH}）。"
+            "请在 <code>producer-dashboard/</code> 执行 <code>npm install && npm run build</code> 后重试。"
+            "</div>"
+        )
+    return _PRODUCER_DASHBOARD_PATH.read_text(encoding="utf-8")
 
 # 3. 十步信息收集：每步对应一组「Cursor 式」快捷回复（可再配合自由输入）
 INTAKE_STAGES = [
@@ -1414,9 +1431,12 @@ refresh_system_message()
 
 st.caption("PopCrew 演示工作台 · 街灯 AI 制片")
 
-tab_intake, tab_pm = st.tabs(["立项与企划", "项目治理"], key="workspace_tabs")
+tab_boss_intake, tab_boss_board, tab_pm_console = st.tabs(
+    ["老板 · 立项", "老板 · 项目看板", "PM · 制片人控制台"],
+    key="workspace_tabs",
+)
 
-with tab_intake:
+with tab_boss_intake:
     # 仅作用于本 Tab 内三列工作台（避免「项目治理」里的 st.columns 吃到 zoom / 边框样式）
     st.markdown(
         """
@@ -1666,5 +1686,9 @@ with tab_intake:
                 finalize_cost_sheet_after_proposal(prop3)
             render_cost_sheet_column()
 
-with tab_pm:
+with tab_boss_board:
     render_project_governance_tab()
+
+with tab_pm_console:
+    st.caption("**PM 执行视角** · 剧组任务板与 AI / 人类双重确认（演示数据，无后端）。")
+    components.html(_load_producer_dashboard_html(), height=980, scrolling=True)
